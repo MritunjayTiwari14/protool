@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:protool/screens/auth_screen.dart';
-import 'package:protool/screens/tasks_screen.dart';
+import 'package:protool/screens/home_screen.dart';
 import 'package:protool/theme.dart';
 import 'firebase_options.dart';
 
@@ -19,7 +19,7 @@ class ProToolApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Task Manager',
-      theme: darkTheme,
+      theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       home: StreamBuilder<User?>(
@@ -33,7 +33,7 @@ class ProToolApp extends StatelessWidget {
           }
           // If we have a user, show the tasks screen
           if (snapshot.hasData) {
-            return TasksScreen();
+            return const HomeScreen();
           }
           // Otherwise, show the auth screen
           return const AuthScreen();

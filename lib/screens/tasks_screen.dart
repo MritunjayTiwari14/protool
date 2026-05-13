@@ -22,6 +22,12 @@ class TasksScreen extends StatelessWidget {
             },
           ),
         ],
+        shape: const Border(
+          bottom: BorderSide(
+            color: Colors.white30,
+            width: 0.5,
+          ),
+        ),
       ),
       body: StreamBuilder<List<Task>>(
         stream: _firestoreService.getTasks(),
