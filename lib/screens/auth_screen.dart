@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/common_widgets.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -90,9 +91,6 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isLogin ? 'Login' : 'Sign Up'),
-      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -113,12 +111,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                 const SizedBox(height: 16),
-                TextFormField(
+                CustomTextField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
+                  labelText: 'Email',
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty || !value.contains('@')) {
@@ -128,12 +123,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
+                CustomTextField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                  ),
+                  labelText: 'Password',
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.length < 6) {
@@ -146,28 +138,28 @@ class _AuthScreenState extends State<AuthScreen> {
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator())
                 else ...[
-                  ElevatedButton(
+                  PrimaryButton(
                     onPressed: _submitAuthForm,
-                    child: Text(_isLogin ? 'Login' : 'Sign Up'),
+                    text: _isLogin ? 'Login' : 'Sign Up',
                   ),
                   const SizedBox(height: 8),
-                  OutlinedButton.icon(
+                  SecondaryIconButton(
                     onPressed: _signInWithGoogle,
-                    icon: const Icon(Icons.login),
-                    label: const Text('Sign in with Google'),
+                    icon: Icons.login,
+                    label: 'Sign in with Google',
                   ),
                 ],
                 if (!_isLoading)
-                  TextButton(
+                  SecondaryTextButton(
                     onPressed: () {
                       setState(() {
                         _isLogin = !_isLogin;
                         _errorMessage = null;
                       });
                     },
-                    child: Text(_isLogin
+                    text: _isLogin
                         ? 'Create new account'
-                        : 'I already have an account'),
+                        : 'I already have an account',
                   ),
               ],
             ),
