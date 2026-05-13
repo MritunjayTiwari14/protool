@@ -90,82 +90,106 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_errorMessage != null)
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.redAccent.withOpacity(0.1),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
+    return Stack(
+      children: [
+        Scaffold(
+          body: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'ProdTool',
                       textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 54
+                      ),
                     ),
-                  ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _emailController,
-                  labelText: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty || !value.contains('@')) {
-                      return 'Please enter a valid email.';
-                    }
-                    return null;
-                  },
+                    Text(
+                      'Skyrocket Your Productivity',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 12
+                      ),
+                    ),
+                    const SizedBox(height: 54),
+                    if (_errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        color: Colors.redAccent.withValues(alpha: 0.1),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      controller: _emailController,
+                      labelText: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty || !value.contains('@')) {
+                          return 'Please enter a valid email.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      controller: _passwordController,
+                      labelText: 'Password',
+                      obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.length < 6) {
+                          return 'Password must be at least 6 characters long.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                      PrimaryButton(
+                        onPressed: _submitAuthForm,
+                        text: _isLogin ? 'Login' : 'Sign Up',
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: const Divider(thickness: 0.5),
+                      ),
+                      SecondaryIconButton(
+                        onPressed: _signInWithGoogle,
+                        icon: Icons.login,
+                        label: 'Sign in with Google',
+                      ),
+                      SecondaryTextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isLogin = !_isLogin;
+                            _errorMessage = null;
+                          });
+                        },
+                        text: _isLogin
+                            ? 'Create new account'
+                            : 'I already have an account',
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: _passwordController,
-                  labelText: 'Password',
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.length < 6) {
-                      return 'Password must be at least 6 characters long.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                if (_isLoading)
-                  const Center(child: CircularProgressIndicator())
-                else ...[
-                  PrimaryButton(
-                    onPressed: _submitAuthForm,
-                    text: _isLogin ? 'Login' : 'Sign Up',
-                  ),
-                  const SizedBox(height: 8),
-                  SecondaryIconButton(
-                    onPressed: _signInWithGoogle,
-                    icon: Icons.login,
-                    label: 'Sign in with Google',
-                  ),
-                ],
-                if (!_isLoading)
-                  SecondaryTextButton(
-                    onPressed: () {
-                      setState(() {
-                        _isLogin = !_isLogin;
-                        _errorMessage = null;
-                      });
-                    },
-                    text: _isLogin
-                        ? 'Create new account'
-                        : 'I already have an account',
-                  ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        if (_isLoading)
+          Container(
+            color: Colors.black.withValues(alpha: 0.5),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+      ],
     );
   }
 }

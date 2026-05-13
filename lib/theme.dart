@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 final ThemeData lightTheme = ThemeData(
   useMaterial3: true,
   brightness: Brightness.light,
+  fontFamily: GoogleFonts.redditSans().fontFamily,
   scaffoldBackgroundColor: Colors.white,
   colorScheme: const ColorScheme(
     brightness: Brightness.light,
@@ -10,7 +12,7 @@ final ThemeData lightTheme = ThemeData(
     primary: Color.fromARGB(255, 104, 73, 250),
     onPrimary: Colors.white,
 
-    secondary: Color(0xFF03DAC6),
+    secondary: Color.fromARGB(255, 104, 73, 250),
     onSecondary: Colors.black,
 
     surface: Colors.white,
@@ -20,25 +22,41 @@ final ThemeData lightTheme = ThemeData(
     onError: Colors.white,
   ),
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF6200EE),
+    backgroundColor: Color.fromARGB(255, 104, 73, 250),
     foregroundColor: Colors.white,
     elevation: 0,
     centerTitle: true,
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF6200EE),
+      backgroundColor: const Color.fromARGB(255, 104, 73, 250),
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
     ),
   ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: Colors.black, // Text and icon color
+      backgroundColor: const Color.fromARGB(255, 104, 73, 250),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+  ),
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+    backgroundColor: Color.fromARGB(255, 104, 73, 250),
+    foregroundColor: Colors.white,
+    shape: CircleBorder(),
+  ),
 );
 
 final ThemeData darkTheme = ThemeData(
   useMaterial3: true,
   brightness: Brightness.dark,
+  fontFamily: GoogleFonts.redditSans().fontFamily,
   scaffoldBackgroundColor: Colors.black,
   colorScheme: const ColorScheme(
     brightness: Brightness.dark,
@@ -56,18 +74,43 @@ final ThemeData darkTheme = ThemeData(
     onError: Colors.black,
   ),
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color.fromARGB(255, 104, 73, 250),
-    foregroundColor: Colors.black,
+    backgroundColor: Colors.black,
+    foregroundColor: Color.fromARGB(255, 104, 73, 250),
     elevation: 0,
     centerTitle: true,
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: const Color.fromARGB(255, 104, 73, 250),
-      foregroundColor: Colors.black,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
       ),
     ),
   ),
+  textButtonTheme: TextButtonThemeData(
+    style: TextButton.styleFrom(
+      foregroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 104, 73, 250), // Text and icon color for dark mode
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+    ),
+  ),
+  
+  iconButtonTheme: IconButtonThemeData(
+    style: IconButton.styleFrom(
+      foregroundColor: Color.fromARGB(255, 104, 73, 250),
+      backgroundColor: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20)
+      )
+    )
+  ),
+
+  floatingActionButtonTheme: FloatingActionButtonThemeData(
+    backgroundColor: Color.fromARGB(255, 104, 73, 250),
+    foregroundColor: Colors.black,
+    shape: CircleBorder()
+  )
 );
