@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../services/firestore_service.dart';
+import '../services/auth_service.dart';
 
 class TasksScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _authService = AuthService();
 
   TasksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Tasks')),
+      appBar: AppBar(
+        title: const Text('My Tasks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await _authService.signOut();
+            },
+          ),
+        ],
+      ),
       body: StreamBuilder<List<Task>>(
         stream: _firestoreService.getTasks(),
         builder: (context, snapshot) {
