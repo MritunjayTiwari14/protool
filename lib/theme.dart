@@ -123,5 +123,19 @@ final ThemeData darkTheme = ThemeData(
         width: 0.5,
       )
     )
+  ),
+
+  segmentedButtonTheme: SegmentedButtonThemeData(
+    style: ButtonStyle(
+      textStyle: WidgetStateProperty.all(
+        TextStyle(fontFamily: GoogleFonts.redditSans().fontFamily, fontSize: 13)),
+      backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Color.fromARGB(255, 104, 73, 250);
+        } else {
+          return Colors.black;
+        }
+      })
+    )
   )
 );

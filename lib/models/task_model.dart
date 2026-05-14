@@ -7,6 +7,7 @@ class Task {
   final DateTime date;
   final bool isCompleted; // Represents the status
   final double position; // Used for drag and drop reordering
+  final String priority; // 'normal', 'main', 'urgent'
 
   Task({
     required this.id,
@@ -15,6 +16,7 @@ class Task {
     required this.date,
     this.isCompleted = false,
     this.position = 0.0,
+    this.priority = 'normal',
   });
 
   // Convert a Task into a Map for Firestore
@@ -25,6 +27,7 @@ class Task {
       'date': Timestamp.fromDate(date),
       'isCompleted': isCompleted,
       'position': position,
+      'priority': priority,
     };
   }
 
@@ -39,6 +42,7 @@ class Task {
       isCompleted: data['isCompleted'] ?? false,
       position: (data['position'] as num?)?.toDouble() ?? 
                 ((data['date'] as Timestamp?)?.toDate().millisecondsSinceEpoch.toDouble() ?? 0.0),
+      priority: data['priority'] ?? 'normal',
     );
   }
 }

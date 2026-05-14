@@ -11,7 +11,6 @@ class MantraScreen extends StatefulWidget {
 
 class _MantraScreenState extends State<MantraScreen> {
   final MantraService mantraService = MantraService();
-  String _id = '';
   String _quote = '';
   String _author = '';
   bool _isLoading = true;
@@ -33,7 +32,6 @@ class _MantraScreenState extends State<MantraScreen> {
         setState(() {
           _quote = mantraResponse.content;
           _author = mantraResponse.author;
-          _id = mantraResponse.id;
         });
       }
     } catch (e) {

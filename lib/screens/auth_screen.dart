@@ -152,30 +152,38 @@ class _AuthScreenState extends State<AuthScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
-                      PrimaryButton(
-                        onPressed: _submitAuthForm,
-                        text: _isLogin ? 'Login' : 'Sign Up',
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.10,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: const Divider(thickness: 0.5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          PrimaryButton(
+                            onPressed: _submitAuthForm,
+                            text: _isLogin ? 'Login' : 'Sign Up',
+                          ),
+                          Divider(thickness: 0.5),
+                          SecondaryIconButton(
+                            onPressed: _signInWithGoogle,
+                            icon: Icons.login,
+                            label: 'Sign in with Google',
+                          ),
+                          const SizedBox(height: 8),
+                          SecondaryTextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isLogin = !_isLogin;
+                                _errorMessage = null;
+                              });
+                            },
+                            text: _isLogin
+                                ? 'Create new account'
+                                : 'I already have an account',
+                          ),
+                        ],
                       ),
-                      SecondaryIconButton(
-                        onPressed: _signInWithGoogle,
-                        icon: Icons.login,
-                        label: 'Sign in with Google',
-                      ),
-                      SecondaryTextButton(
-                        onPressed: () {
-                          setState(() {
-                            _isLogin = !_isLogin;
-                            _errorMessage = null;
-                          });
-                        },
-                        text: _isLogin
-                            ? 'Create new account'
-                            : 'I already have an account',
-                      ),
+                    ),
                   ],
                 ),
               ),

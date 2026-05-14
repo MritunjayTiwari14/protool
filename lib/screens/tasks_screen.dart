@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/task_dialog.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -49,95 +50,34 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   void _showTaskDialog({Task? taskToEdit}) {
-    final titleController = TextEditingController(text: taskToEdit?.title ?? '');
-    final descriptionController = TextEditingController(text: taskToEdit?.description ?? '');
-    DateTime selectedDate = taskToEdit?.date ?? DateTime.now();
-
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text(taskToEdit == null ? 'New Task' : 'Edit Task'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(labelText: 'Title'),
-                    ),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: const InputDecoration(labelText: 'Description'),
-                      maxLines: 3,
-                      minLines: 1,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Text('Date: ${selectedDate.toLocal().toString().split(' ')[0]}'),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () async {
-                            final DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: selectedDate,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2101),
-                            );
-                            if (picked != null && picked != selectedDate) {
-                              setDialogState(() {
-                                selectedDate = picked;
-                              });
-                            }
-                          },
-                          child: const Text('Select Date'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    if (titleController.text.trim().isEmpty) return;
-                    
-                    if (taskToEdit == null) {
-                      await _firestoreService.addTask(Task(
-                        id: '', 
-                        title: titleController.text.trim(),
-                        description: descriptionController.text.trim(),
-                        date: selectedDate,
-                        position: DateTime.now().millisecondsSinceEpoch.toDouble(),
-                      ));
-                    } else {
-                      await _firestoreService.updateTask(Task(
-                        id: taskToEdit.id,
-                        title: titleController.text.trim(),
-                        description: descriptionController.text.trim(),
-                        date: selectedDate,
-                        isCompleted: taskToEdit.isCompleted,
-                        position: taskToEdit.position,
-                      ));
-                      _clearSelection();
-                    }
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          }
+        return TaskDialog(
+          taskToEdit: taskToEdit,
+          onSave: (Task task) async {
+            if (task.id.isEmpty) {
+              await _firestoreService.addTask(task);
+            } else {
+              await _firestoreService.updateTask(task);
+              _clearSelection();
+            }
+          },
         );
       },
     );
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'urgent':
+        return Colors.red.withAlpha(30);
+      case 'main':
+        return Colors.amber.withAlpha(30);
+      case 'normal':
+      default:
+        return Colors.green.withAlpha(30);
+    }
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -171,6 +111,7 @@ class _TasksScreenState extends State<TasksScreen> {
         date: task.date,
         isCompleted: task.isCompleted,
         position: newPosition,
+        priority: task.priority,
       );
 
       _firestoreService.updateTaskPosition(task.id, newPosition);
@@ -265,58 +206,71 @@ class _TasksScreenState extends State<TasksScreen> {
             return const Center(child: Text('No tasks yet.'));
           }
 
-          return ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            itemCount: _localTasks!.length,
-            onReorderItem: _onReorder,
-            itemBuilder: (context, index) {
-              final task = _localTasks![index];
-              final isSelected = selectedTaskIds.contains(task.id);
-              
-              return ListTile(
-                key: ValueKey(task.id),
-                selected: isSelected,
-                selectedTileColor: Colors.blue.withAlpha(51),
-                leading: isSelectionMode
-                    ? null
-                    : ReorderableDragStartListener(
-                        index: index,
-                        child: const Icon(Icons.drag_indicator),
-                      ),
-                title: Text(
-                  task.title,
-                  style: TextStyle(
-                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                subtitle: Text(task.description),
-                trailing: isSelectionMode
-                  ? Checkbox(
-                      value: isSelected,
-                      onChanged: (value) {
-                        _toggleSelection(task.id);
-                      },
-                    )
-                  : Checkbox(
-                      value: task.isCompleted,
-                      onChanged: (value) {
-                        _firestoreService.toggleTaskStatus(task.id, task.isCompleted);
-                      },
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+            child: ReorderableListView.builder(
+              buildDefaultDragHandles: false,
+              itemCount: _localTasks!.length,
+              onReorderItem: _onReorder,
+              proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                return Material(
+                  elevation: 4,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  shadowColor: Colors.black45,
+                  child: child,
+                );
+              },
+              itemBuilder: (context, index) {
+                final task = _localTasks![index];
+                final isSelected = selectedTaskIds.contains(task.id);
+
+                return Container(
+                  key: ValueKey(task.id),
+                  color: isSelected ? Colors.blue.withAlpha(51) : _getPriorityColor(task.priority),
+                  child: ListTile(
+                    selected: isSelected,
+                    leading: isSelectionMode
+                      ? null
+                      : ReorderableDragStartListener(
+                          index: index,
+                          child: const Icon(Icons.drag_indicator),
+                        ),
+                  title: Text(
+                    task.title,
+                    style: TextStyle(
+                      decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                     ),
-                onLongPress: () {
-                  if (!isSelectionMode) {
-                    _toggleSelection(task.id);
-                  }
-                },
-                onTap: () {
-                  if (isSelectionMode) {
-                    _toggleSelection(task.id);
-                  } else {
-                    // Open details or nothing in normal mode
-                  }
-                },
-              );
-            },
+                  ),
+                  subtitle: Text(task.description),
+                  trailing: isSelectionMode
+                    ? Checkbox(
+                        value: isSelected,
+                        onChanged: (value) {
+                          _toggleSelection(task.id);
+                        },
+                      )
+                    : Checkbox(
+                        value: task.isCompleted,
+                        onChanged: (value) {
+                          _firestoreService.toggleTaskStatus(task.id, task.isCompleted);
+                        },
+                      ),
+                  onLongPress: () {
+                    if (!isSelectionMode) {
+                      _toggleSelection(task.id);
+                    }
+                  },
+                  onTap: () {
+                    if (isSelectionMode) {
+                      _toggleSelection(task.id);
+                    } else {
+                      // Open details or nothing in normal mode
+                    }
+                  },
+                  )
+                );
+              },
+            ),
           );
         },
       ),
