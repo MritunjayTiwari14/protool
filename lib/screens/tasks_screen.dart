@@ -4,7 +4,7 @@ import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 
 class TasksScreen extends StatefulWidget {
-  TasksScreen({super.key});
+  const TasksScreen({super.key});
 
   @override
   State<TasksScreen> createState() => _TasksScreenState();
@@ -15,6 +15,15 @@ class _TasksScreenState extends State<TasksScreen> {
   final AuthService _authService = AuthService();
   
   Set<String> selectedTaskIds = {};
+  List<Task>? _localTasks;
+  List<Task>? _lastSnapshotData;
+  late final Stream<List<Task>> _tasksStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _tasksStream = _firestoreService.getTasks();
+  }
 
   void _toggleSelection(String taskId) {
     setState(() {
@@ -106,6 +115,7 @@ class _TasksScreenState extends State<TasksScreen> {
                         title: titleController.text.trim(),
                         description: descriptionController.text.trim(),
                         date: selectedDate,
+                        position: DateTime.now().millisecondsSinceEpoch.toDouble(),
                       ));
                     } else {
                       await _firestoreService.updateTask(Task(
@@ -114,10 +124,11 @@ class _TasksScreenState extends State<TasksScreen> {
                         description: descriptionController.text.trim(),
                         date: selectedDate,
                         isCompleted: taskToEdit.isCompleted,
+                        position: taskToEdit.position,
                       ));
                       _clearSelection();
                     }
-                    if (mounted) Navigator.pop(context);
+                    if (context.mounted) Navigator.pop(context);
                   },
                   child: const Text('Save'),
                 ),
@@ -127,6 +138,43 @@ class _TasksScreenState extends State<TasksScreen> {
         );
       },
     );
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    if (oldIndex == newIndex) return;
+
+    setState(() {
+      if (_localTasks == null) return;
+      
+      final task = _localTasks!.removeAt(oldIndex);
+      _localTasks!.insert(newIndex, task);
+
+      double newPosition;
+      if (newIndex == 0) {
+        // Moved to top, higher position than current first
+        newPosition = _localTasks!.length > 1 ? _localTasks![1].position + 10000.0 : DateTime.now().millisecondsSinceEpoch.toDouble();
+      } else if (newIndex == _localTasks!.length - 1) {
+        // Moved to bottom, lower position than current last
+        newPosition = _localTasks![_localTasks!.length - 2].position - 10000.0;
+      } else {
+        // Moved in between
+        double positionAbove = _localTasks![newIndex - 1].position;
+        double positionBelow = _localTasks![newIndex + 1].position;
+        newPosition = (positionAbove + positionBelow) / 2;
+      }
+
+      // Update the local task object visually
+      _localTasks![newIndex] = Task(
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        date: task.date,
+        isCompleted: task.isCompleted,
+        position: newPosition,
+      );
+
+      _firestoreService.updateTaskPosition(task.id, newPosition);
+    });
   }
 
   @override
@@ -169,11 +217,14 @@ class _TasksScreenState extends State<TasksScreen> {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
                         onPressed: () {
                           Navigator.pop(context);
                           _deleteSelectedTasks();
                         },
-                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                        child: const Text('Delete'),
                       ),
                     ],
                   ),
@@ -196,28 +247,42 @@ class _TasksScreenState extends State<TasksScreen> {
         ),
       ),
       body: StreamBuilder<List<Task>>(
-        stream: _firestoreService.getTasks(),
+        stream: _tasksStream,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting && _localTasks == null) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          
+          if (snapshot.hasData && snapshot.data != _lastSnapshotData) {
+            _lastSnapshotData = snapshot.data;
+            _localTasks = List.from(snapshot.data!);
+          }
+
+          if (_localTasks == null || _localTasks!.isEmpty) {
             return const Center(child: Text('No tasks yet.'));
           }
 
-          final tasks = snapshot.data!;
-          return ListView.builder(
-            itemCount: tasks.length,
+          return ReorderableListView.builder(
+            buildDefaultDragHandles: false,
+            itemCount: _localTasks!.length,
+            onReorderItem: _onReorder,
             itemBuilder: (context, index) {
-              final task = tasks[index];
+              final task = _localTasks![index];
               final isSelected = selectedTaskIds.contains(task.id);
               
               return ListTile(
+                key: ValueKey(task.id),
                 selected: isSelected,
                 selectedTileColor: Colors.blue.withAlpha(51),
+                leading: isSelectionMode
+                    ? null
+                    : ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_indicator),
+                      ),
                 title: Text(
                   task.title,
                   style: TextStyle(

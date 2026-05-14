@@ -112,5 +112,16 @@ final ThemeData darkTheme = ThemeData(
     backgroundColor: Color.fromARGB(255, 104, 73, 250),
     foregroundColor: Colors.black,
     shape: CircleBorder()
+  ),
+
+  dialogTheme: DialogThemeData(
+    backgroundColor: Colors.black45,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(24),
+      side: const BorderSide(
+        color: Colors.white,
+        width: 0.5,
+      )
+    )
   )
 );

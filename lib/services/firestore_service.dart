@@ -23,10 +23,17 @@ class FirestoreService {
   // 2. Get Tasks (Read - Stream for real-time updates)
   Stream<List<Task>> getTasks() {
     return _tasksCollection
-        .orderBy('date', descending: true)
         .snapshots()
-        .map((snapshot) => 
-            snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList());
+        .map((snapshot) {
+          final tasks = snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
+          tasks.sort((a, b) => b.position.compareTo(a.position)); // Descending: newest/highest at the top
+          return tasks;
+        });
+  }
+
+  // Update task position for reordering
+  Future<void> updateTaskPosition(String taskId, double newPosition) async {
+    await _tasksCollection.doc(taskId).update({'position': newPosition});
   }
 
   // Get single task by ID
