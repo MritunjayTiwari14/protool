@@ -103,17 +103,19 @@ class _AuthScreenState extends State<AuthScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'ProdTool',
+                      'ProTool',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 54
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 84
                       ),
                     ),
                     Text(
                       'Skyrocket Your Productivity',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 12
+                          fontSize: 16
                       ),
                     ),
                     const SizedBox(height: 54),
