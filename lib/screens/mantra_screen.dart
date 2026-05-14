@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:protool/models/mantra_response.dart';
 import 'dart:convert';
+import '../services/mantra_service.dart';
 import '../widgets/common_widgets.dart';
 
 class MantraScreen extends StatefulWidget {
@@ -11,6 +13,8 @@ class MantraScreen extends StatefulWidget {
 }
 
 class _MantraScreenState extends State<MantraScreen> {
+  final MantraService mantraService = MantraService();
+  String _id = '';
   String _quote = '';
   String _author = '';
   bool _isLoading = true;
@@ -25,28 +29,29 @@ class _MantraScreenState extends State<MantraScreen> {
     setState(() {
       _isLoading = true;
     });
+    
     try {
-      final response = await http.get(Uri.parse('https://api.quotable.io/random'));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      final mantraResponse = await mantraService.getMantra();
+      if (mounted) {
         setState(() {
-          _quote = data['content'];
-          _author = data['author'];
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _quote = 'Failed to fetch mantra. Stay strong!';
-          _author = 'System';
-          _isLoading = false;
+          _quote = mantraResponse.content;
+          _author = mantraResponse.author;
+          _id = mantraResponse.id;
         });
       }
     } catch (e) {
-      setState(() {
-        _quote = 'Network error. Please try again.';
-        _author = 'System';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _quote = 'Failed to load mantra.';
+          _author = 'System';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

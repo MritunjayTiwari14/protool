@@ -19,7 +19,7 @@ class ProToolApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Task Manager',
-      theme: lightTheme,
+      theme: darkTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       home: StreamBuilder<User?>(

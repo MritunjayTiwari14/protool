@@ -29,6 +29,15 @@ class FirestoreService {
             snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList());
   }
 
+  // Get single task by ID
+  Future<Task?> getTaskById(String taskId) async {
+    final doc = await _tasksCollection.doc(taskId).get();
+    if (doc.exists) {
+      return Task.fromFirestore(doc);
+    }
+    return null;
+  }
+
   // 3. Update Task (Edit)
   Future<void> updateTask(Task task) async {
     await _tasksCollection.doc(task.id).update(task.toMap());
