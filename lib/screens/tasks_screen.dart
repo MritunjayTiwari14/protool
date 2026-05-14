@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/task_model.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
@@ -78,6 +79,91 @@ class _TasksScreenState extends State<TasksScreen> {
       default:
         return Colors.green.withAlpha(30);
     }
+  }
+
+  void _onTaskCompletionToggled(Task task, bool value) async {
+    if (!value) {
+      await _firestoreService.toggleTaskStatus(task.id, true);
+      return;
+    }
+
+    final settings = await _firestoreService.getUserSettings();
+    bool hasPrompted = settings['hasPromptedDeleteOnComplete'] ?? false;
+    bool deleteOnComplete = settings['deleteOnComplete'] ?? false;
+
+    if (!hasPrompted) {
+      if (!mounted) return;
+      bool? userChoice = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Auto-Delete Completed Tasks?'),
+          content: const Text('Would you like to automatically delete tasks when you mark them as complete?\n\nYou can change this later in settings.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('No, keep them'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Yes, delete them'),
+            ),
+          ],
+        ),
+      );
+      
+      if (userChoice != null) {
+        deleteOnComplete = userChoice;
+        await _firestoreService.updateUserSettings({
+          'hasPromptedDeleteOnComplete': true,
+          'deleteOnComplete': deleteOnComplete,
+        });
+      }
+    }
+
+    if (deleteOnComplete) {
+      await _firestoreService.deleteTask(task.id);
+    } else {
+      await _firestoreService.toggleTaskStatus(task.id, false);
+    }
+  }
+
+  void _showSettingsDialog() async {
+    final settings = await _firestoreService.getUserSettings();
+    bool deleteOnComplete = settings['deleteOnComplete'] ?? false;
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Settings'),
+              content: SwitchListTile(
+                title: const Text('Auto-Delete on Complete'),
+                subtitle: const Text('Tasks will be removed automatically when checked.'),
+                value: deleteOnComplete,
+                onChanged: (val) {
+                  setDialogState(() {
+                    deleteOnComplete = val;
+                  });
+                  _firestoreService.updateUserSettings({
+                    'deleteOnComplete': val,
+                    'hasPromptedDeleteOnComplete': true,
+                  });
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -172,6 +258,20 @@ class _TasksScreenState extends State<TasksScreen> {
                 );
               },
             ),
+          if (isSelectionMode)
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'settings') {
+                  _showSettingsDialog();
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'settings',
+                  child: Text('Auto-Delete Settings'),
+                ),
+              ],
+            ),
           if (!isSelectionMode)
             IconButton(
               icon: const Icon(Icons.logout),
@@ -238,10 +338,25 @@ class _TasksScreenState extends State<TasksScreen> {
                   title: Text(
                     task.title,
                     style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: GoogleFonts.redditSans().fontFamily,
                       decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                     ),
                   ),
-                  subtitle: Text(task.description),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Divider(
+                        thickness: 0.5,
+                      color: Colors.white30),
+                      Text(task.description, overflow: TextOverflow.fade),
+                      Divider(
+                          thickness: 0.5,
+                          color: Colors.white30),
+                      Text("Deadline: ${task.date.toString().substring(0, 10)}", overflow: TextOverflow.fade),
+                    ],
+                  ),
                   trailing: isSelectionMode
                     ? Checkbox(
                         value: isSelected,
@@ -252,7 +367,9 @@ class _TasksScreenState extends State<TasksScreen> {
                     : Checkbox(
                         value: task.isCompleted,
                         onChanged: (value) {
-                          _firestoreService.toggleTaskStatus(task.id, task.isCompleted);
+                          if (value != null) {
+                            _onTaskCompletionToggled(task, value);
+                          }
                         },
                       ),
                   onLongPress: () {

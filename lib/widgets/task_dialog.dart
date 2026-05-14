@@ -80,21 +80,28 @@ class _TaskDialogState extends State<TaskDialog> {
                 fontSize: 16)),
             const SizedBox(height: 8),
             SegmentedButton<String>(
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                textStyle: TextStyle(
+                  fontSize: (MediaQuery.of(context).size.width * 0.035).clamp(10.0, 14.0),
+                ),
+              ),
               segments: const [
                 ButtonSegment(
                   value: 'normal',
-                  label: Text('Normal'),
-                  icon: Icon(Icons.circle, color: Colors.green),
+                  label: FittedBox(fit: BoxFit.scaleDown, child: Text('Normal')),
+                  icon: Icon(Icons.circle, color: Colors.green, size: 14),
                 ),
                 ButtonSegment(
                   value: 'main',
-                  label: Text('Main'),
-                  icon: Icon(Icons.circle, color: Colors.amber),
+                  label: FittedBox(fit: BoxFit.scaleDown, child: Text('Main')),
+                  icon: Icon(Icons.circle, color: Colors.amber, size: 14),
                 ),
                 ButtonSegment(
                   value: 'urgent',
-                  label: Text('Urgent'),
-                  icon: Icon(Icons.circle, color: Colors.red),
+                  label: FittedBox(fit: BoxFit.scaleDown, child: Text('Urgent')),
+                  icon: Icon(Icons.circle, color: Colors.red, size: 14),
                 ),
               ],
               selected: {_selectedPriority},

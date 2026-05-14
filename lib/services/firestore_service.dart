@@ -15,6 +15,28 @@ class FirestoreService {
     return _db.collection('users').doc(userId).collection('tasks');
   }
 
+  DocumentReference get _userDoc {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not logged in');
+    }
+    return _db.collection('users').doc(userId);
+  }
+
+  // Get user settings
+  Future<Map<String, dynamic>> getUserSettings() async {
+    final doc = await _userDoc.get();
+    if (doc.exists && doc.data() != null) {
+      return doc.data() as Map<String, dynamic>;
+    }
+    return {};
+  }
+
+  // Update user settings
+  Future<void> updateUserSettings(Map<String, dynamic> settings) async {
+    await _userDoc.set(settings, SetOptions(merge: true));
+  }
+
   // 1. Add Task (Create)
   Future<void> addTask(Task task) async {
     await _tasksCollection.add(task.toMap());
