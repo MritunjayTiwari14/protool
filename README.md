@@ -17,20 +17,14 @@ ProTool is a productivity application designed to help you organize your daily l
 Below are screenshots of the main application screens:
 
 ### Authentication Screen
-<!-- Replace the path below with an actual screenshot image of the Auth Screen -->
-![Auth Screen Placeholder](assets/screenshots/auth_screen.png)
-
-### Home Screen
-<!-- Replace the path below with an actual screenshot image of the Home Screen -->
-![Home Screen Placeholder](assets/screenshots/home_screen.png)
+<img width="234.5" height="495.5" alt="image" src="https://github.com/user-attachments/assets/83f67702-cdf0-4c8e-ac4e-1acb2167d1fb" />
 
 ### Tasks Screen
-<!-- Replace the path below with an actual screenshot image of the Tasks Screen -->
-![Tasks Screen Placeholder](assets/screenshots/tasks_screen.png)
+<img width="234.5" height="495.5" alt="image" src="https://github.com/user-attachments/assets/c0e06337-0162-4ced-b638-f4e567640440" />
 
 ### Mantra Screen
-<!-- Replace the path below with an actual screenshot image of the Mantra Screen -->
-![Mantra Screen Placeholder](assets/screenshots/mantra_screen.png)
+<img width="234.5" height="495.5" alt="image" src="https://github.com/user-attachments/assets/13ead51b-243b-4170-b824-52ff94d1c9ba" />
+
 
 ## Getting Started
 
