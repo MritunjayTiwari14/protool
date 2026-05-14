@@ -46,6 +46,7 @@ app.*.map.json
 
 # Firebase options
 /lib/firebase_options.dart
+/android/app/google-services.json
 
 # Personal Utilities
 Flutter_dev.pdf
